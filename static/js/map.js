@@ -331,7 +331,7 @@ function searchControl(action) {
 
 function updateSearchStatus() {
     $.getJSON(searchControlURI).then(function (data) {
-        $('#search-switch').prop('checked', data.status)
+        $('#search-switch').prop('checked', data.status);
         $('#scan-here').toggleClass('disabled', !data.status)
     })
 }
@@ -441,7 +441,7 @@ function pokemonLabel(name, rarity, types, disappearTime, id, latitude, longitud
     return contentstring
 }
 
-function gymLabel(teamName, teamId, gymPoints, latitude, longitude, lastScanned = null, name = null, members = [], gymId) {
+function gymLabel(teamName, teamId, gymPoints, latitude, longitude, lastScanned = null, lastModified = null, name = null, members = [], gymId) {
     var memberStr = ''
     for (var i = 0; i < members.length; i++) {
         memberStr += `
@@ -457,6 +457,13 @@ function gymLabel(teamName, teamId, gymPoints, latitude, longitude, lastScanned 
         lastScannedStr = `${lastScannedDate.getFullYear()}-${pad(lastScannedDate.getMonth() + 1)}-${pad(lastScannedDate.getDate())} ${pad(lastScannedDate.getHours())}:${pad(lastScannedDate.getMinutes())}:${pad(lastScannedDate.getSeconds())}`
     } else {
         lastScannedStr = 'Unknown'
+    }
+    var lastModifiedStr;
+    if (lastModified) {
+        var lastModifiedDate = new Date(lastModified);
+        lastModifiedStr = `${lastModifiedDate.getFullYear()}-${pad(lastModifiedDate.getMonth() + 1)}-${pad(lastModifiedDate.getDate())} ${pad(lastModifiedDate.getHours())}:${pad(lastModifiedDate.getMinutes())}:${pad(lastModifiedDate.getSeconds())}`
+    } else {
+        lastModifiedStr = 'Unknown'
     }
     var directionsStr = ''
     if (!Store.get('useGymSidebar')) {
@@ -483,6 +490,9 @@ function gymLabel(teamName, teamId, gymPoints, latitude, longitude, lastScanned 
                     </div>
                     <div>
                         Last Scanned: ${lastScannedStr}
+                    </div>
+                    <div>
+                        Last Modified: ${lastModifiedStr}
                     </div>
                     ${directionsStr}
                 </center>
@@ -513,6 +523,9 @@ function gymLabel(teamName, teamId, gymPoints, latitude, longitude, lastScanned 
                     </div>
                     <div>
                         Last Scanned: ${lastScannedStr}
+                    </div>
+                    <div>
+                        Last Modified: ${lastModifiedStr}
                     </div>
                     ${directionsStr}
                 </center>
@@ -753,14 +766,14 @@ function setupGymMarker(item) {
             url: 'static/forts/' + Store.get('gymMarkerStyle') + '/' + gymTypes[item['team_id']] + (item['team_id'] !== 0 ? '_' + getGymLevel(item['gym_points']) : '') + '.png',
             scaledSize: new google.maps.Size(48, 48)
         }
-    })
+    });
 
     if (!marker.rangeCircle && isRangeActive(map)) {
         marker.rangeCircle = addRangeCircle(marker, map, 'gym', item['team_id'])
     }
 
     marker.infoWindow = new google.maps.InfoWindow({
-        content: gymLabel(gymTypes[item['team_id']], item['team_id'], item['gym_points'], item['latitude'], item['longitude'], item['last_scanned'], item['name'], item['pokemon'], item['gym_id']),
+        content: gymLabel(gymTypes[item['team_id']], item['team_id'], item['gym_points'], item['latitude'], item['longitude'], item['last_scanned'],item['last_modified'], item['name'], item['pokemon'], item['gym_id']),
         disableAutoPan: true
     })
 
@@ -803,7 +816,7 @@ function updateGymMarker(item, marker) {
         url: 'static/forts/' + Store.get('gymMarkerStyle') + '/' + gymTypes[item['team_id']] + (item['team_id'] !== 0 ? '_' + getGymLevel(item['gym_points']) : '') + '.png',
         scaledSize: new google.maps.Size(48, 48)
     })
-    marker.infoWindow.setContent(gymLabel(gymTypes[item['team_id']], item['team_id'], item['gym_points'], item['latitude'], item['longitude'], item['last_scanned'], item['name'], item['pokemon'], item['gym_id']))
+    marker.infoWindow.setContent(gymLabel(gymTypes[item['team_id']], item['team_id'], item['gym_points'], item['latitude'], item['longitude'], item['last_scanned'],item['last_modified'], item['name'], item['pokemon'], item['gym_id']))
     return marker
 }
 
@@ -1073,7 +1086,7 @@ function showInBoundsMarkers(markers, type) {
             if (marker.getAnimation) {
                 marker.oldAnimation = marker.getAnimation()
             }
-            if (marker.rangeCircle) marker.rangeCircle.setMap(null)
+            if (marker.rangeCircle) marker.rangeCircle.setMap(null);
             marker.setMap(null)
         }
     })
@@ -1712,6 +1725,7 @@ function showGymDetails(id) { // eslint-disable-line no-unused-vars
         var nextLvlPrestige = gymPrestige[gymLevel - 1] || 50000
         var prestigePercentage = (result.gym_points / nextLvlPrestige) * 100
         var lastScannedDate = new Date(result.last_scanned)
+        var lastModifiedDate = new Date(result.last_modified);
         var freeSlots = result.pokemon.length ? gymLevel - result.pokemon.length : 0
         var freeSlotsStr = freeSlots ? ` - ${freeSlots} Free Slots` : ''
         var gymLevelStr = ''
@@ -1743,6 +1757,9 @@ function showGymDetails(id) { // eslint-disable-line no-unused-vars
                 ${gymLevelStr}
                 <div style="font-size: .7em;">
                     Last Scanned: ${lastScannedDate.getFullYear()}-${pad(lastScannedDate.getMonth() + 1)}-${pad(lastScannedDate.getDate())} ${pad(lastScannedDate.getHours())}:${pad(lastScannedDate.getMinutes())}:${pad(lastScannedDate.getSeconds())}
+                </div>
+                <div style="font-size: .7em;">
+                    Last Scanned: ${lastModifiedDate.getFullYear()}-${pad(lastModifiedDate.getMonth() + 1)}-${pad(lastModifiedDate.getDate())} ${pad(lastModifiedDate.getHours())}:${pad(lastModifiedDate.getMinutes())}:${pad(lastModifiedDate.getSeconds())}
                 </div>
                 <div>
                     <a href='javascript:void(0);' onclick='javascript:openMapDirections(${result.latitude},${result.longitude});' title='View in Maps'>Get directions</a>
@@ -2004,7 +2021,7 @@ $(function () {
     $selectLuredPokestopsOnly.select2({
         placeholder: 'Only Show Lured Pokestops',
         minimumResultsForSearch: Infinity
-    })
+    });
 
     $selectLuredPokestopsOnly.on('change', function () {
         Store.set('showLuredPokestopsOnly', this.value)
