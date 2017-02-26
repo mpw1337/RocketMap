@@ -1768,7 +1768,7 @@ function showGymDetails(id) { // eslint-disable-line no-unused-vars
                     Last Scanned: ${lastScannedDate.getFullYear()}-${pad(lastScannedDate.getMonth() + 1)}-${pad(lastScannedDate.getDate())} ${pad(lastScannedDate.getHours())}:${pad(lastScannedDate.getMinutes())}:${pad(lastScannedDate.getSeconds())}
                 </div>
                 <div style="font-size: .7em;">
-                    Last Scanned: ${lastModifiedDate.getFullYear()}-${pad(lastModifiedDate.getMonth() + 1)}-${pad(lastModifiedDate.getDate())} ${pad(lastModifiedDate.getHours())}:${pad(lastModifiedDate.getMinutes())}:${pad(lastModifiedDate.getSeconds())}
+                    Last Modified: ${lastModifiedDate.getFullYear()}-${pad(lastModifiedDate.getMonth() + 1)}-${pad(lastModifiedDate.getDate())} ${pad(lastModifiedDate.getHours())}:${pad(lastModifiedDate.getMinutes())}:${pad(lastModifiedDate.getSeconds())}
                 </div>
                 <div>
                     <a href='javascript:void(0);' onclick='javascript:openMapDirections(${result.latitude},${result.longitude});' title='View in Maps'>Get directions</a>
