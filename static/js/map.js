@@ -392,6 +392,15 @@ function openMapDirections(lat, lng) { // eslint-disable-line no-unused-vars
     var url = 'https://www.google.com/maps/?daddr=' + lat + ',' + lng
     window.open(url, '_blank')
 }
+//Converts timestamp to readable String
+function getDateStr(t){
+    var dateStr = 'Unknown'
+    if (t){
+        var d = new Date(t)
+        dateStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+    }
+    return dateStr
+}
 
 function pokemonLabel(name, rarity, types, disappearTime, id, latitude, longitude, encounterId, atk, def, sta, move1, move2, weight, height, gender) {
     var disappearDate = new Date(disappearTime)
@@ -467,13 +476,7 @@ function gymLabel(teamName, teamId, gymPoints, latitude, longitude, lastScanned 
     } else {
         lastScannedStr = 'Unknown'
     }
-    var lastModifiedStr
-    if (lastModified) {
-        var lastModifiedDate = new Date(lastModified)
-        lastModifiedStr = `${lastModifiedDate.getFullYear()}-${pad(lastModifiedDate.getMonth() + 1)}-${pad(lastModifiedDate.getDate())} ${pad(lastModifiedDate.getHours())}:${pad(lastModifiedDate.getMinutes())}:${pad(lastModifiedDate.getSeconds())}`
-    } else {
-        lastModifiedStr = 'Unknown'
-    }
+    var lastModifiedStr = getDateStr(lastModified)
     var directionsStr = ''
     if (!Store.get('useGymSidebar')) {
         directionsStr = `<div>
@@ -1734,7 +1737,7 @@ function showGymDetails(id) { // eslint-disable-line no-unused-vars
         var nextLvlPrestige = gymPrestige[gymLevel - 1] || 50000
         var prestigePercentage = (result.gym_points / nextLvlPrestige) * 100
         var lastScannedDate = new Date(result.last_scanned)
-        var lastModifiedDate = new Date(result.last_modified)
+        var lastModifiedDateStr = getDateStr(result.last_modified)
         var freeSlots = result.pokemon.length ? gymLevel - result.pokemon.length : 0
         var freeSlotsStr = freeSlots ? ` - ${freeSlots} Free Slots` : ''
         var gymLevelStr = ''
@@ -1768,7 +1771,7 @@ function showGymDetails(id) { // eslint-disable-line no-unused-vars
                     Last Scanned: ${lastScannedDate.getFullYear()}-${pad(lastScannedDate.getMonth() + 1)}-${pad(lastScannedDate.getDate())} ${pad(lastScannedDate.getHours())}:${pad(lastScannedDate.getMinutes())}:${pad(lastScannedDate.getSeconds())}
                 </div>
                 <div style="font-size: .7em;">
-                    Last Modified: ${lastModifiedDate.getFullYear()}-${pad(lastModifiedDate.getMonth() + 1)}-${pad(lastModifiedDate.getDate())} ${pad(lastModifiedDate.getHours())}:${pad(lastModifiedDate.getMinutes())}:${pad(lastModifiedDate.getSeconds())}
+                    Last Modified: ${lastModifiedDateStr}
                 </div>
                 <div>
                     <a href='javascript:void(0);' onclick='javascript:openMapDirections(${result.latitude},${result.longitude});' title='View in Maps'>Get directions</a>
