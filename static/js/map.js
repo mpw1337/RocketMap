@@ -69,6 +69,7 @@ var audio = new Audio('static/sounds/ding.mp3')
 
 var GenderType = ['♂', '♀', '⚪']
 
+
 /*
   text place holders:
   <pkm> - pokemon name
@@ -396,7 +397,7 @@ function openMapDirections(lat, lng) { // eslint-disable-line no-unused-vars
 function getDateStr(t) {
     var dateStr = 'Unknown'
     if (t) {
-        dateStr = moment(t).format("YYYY-MM-DD HH:MM:SS")
+        dateStr = moment(t).format('YYYY-MM-DD HH:MM:SS')
     }
     return dateStr
 }
