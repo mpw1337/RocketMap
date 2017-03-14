@@ -47,5 +47,6 @@
     "pGoStyleNoLabels": true,
     "pGoStyleDay": true,
     "pGoStyleNight": true
+    "moment": false
   }
 }
