@@ -398,7 +398,7 @@ function openMapDirections(lat, lng) { // eslint-disable-line no-unused-vars
 function getDateStr(t) {
     var dateStr = 'Unknown'
     if (t) {
-        dateStr = moment(t).format('YYYY-MM-DD HH:MM:SS')
+        dateStr = moment(t).format('YYYY-MM-DD HH:mm:ss')
     }
     return dateStr
 }
