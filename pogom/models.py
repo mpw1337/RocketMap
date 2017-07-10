@@ -1746,6 +1746,12 @@ class GymDetails(BaseModel):
     url = Utf8mb4CharField()
     last_scanned = DateTimeField(default=datetime.utcnow)
 
+class PlayerLocation():
+    name = str()
+    lat = float()
+    lng = float()
+    event = int()
+    time = int()
 
 class GymEvent(BaseModel):
     pokemon_uid = Utf8mb4CharField(primary_key=True, max_length=50)
@@ -1768,10 +1774,28 @@ class GymEvent(BaseModel):
             gyms.append(g)
 
         events = []
-        for e in query:
+        for e in event_query:
             events.append(e)
 
+        # Building Dictionary of events per Player
+        players = []
+        for e in events:
+            player = PlayerLocation()
+            player.name = e.trainer_name
+            # Get gym with id of event from gyms
+            gym = gyms.id[e.gym_id]
+            player.lat = gym[latitude]
+            player.lng = gym[longitude]
+            player.time = e.timestamp
+            player.event = e.event
+            players[player.name]+=player
+
+        for p in players:
+            # calculation of distance?
+
         spoofers = []
+
+
         return spoofers
 
 
