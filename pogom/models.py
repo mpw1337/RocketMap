@@ -1747,6 +1747,34 @@ class GymDetails(BaseModel):
     last_scanned = DateTimeField(default=datetime.utcnow)
 
 
+class GymEvent(BaseModel):
+    pokemon_uid = Utf8mb4CharField(primary_key=True, max_length=50)
+    gym_id = Utf8mb4CharField(max_length=50)
+    event = SmallIntegerField()
+    trainer_name = Utf8mb4CharField(index=True, max_length=50)
+    timestamp = DateTimeField()
+
+    @staticmethod
+    def find_spoofers():
+        event_query = GymEvent.select().dicts()
+        gym_query = (Gym
+                 .select(GymEvent.gym_id,
+                         GymEvent.latitude,
+                         GymEvent.longitude)
+                 .dicts())
+
+        gyms = []
+        for g in gym_query:
+            gyms.append(g)
+
+        events = []
+        for e in query:
+            events.append(e)
+
+        spoofers = []
+        return spoofers
+
+
 class Token(flaskDb.Model):
     token = TextField()
     last_updated = DateTimeField(default=datetime.utcnow, index=True)
@@ -1839,6 +1867,7 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue,
     pokemon = {}
     pokestops = {}
     gyms = {}
+    gym_events = {}
     raids = {}
     skipped = 0
     stopsskipped = 0
@@ -2302,6 +2331,7 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue,
             elif config['parse_gyms'] and f.get('type') is None:
                 b64_gym_id = b64encode(str(f['id']))
                 gym_display = f.get('gym_display', {})
+                gym_event = gym_display.get('gym_event', [])
                 raid_info = f.get('raid_info', {})
                 # Send gyms to webhooks.
                 if args.webhooks and not args.webhook_updates_only:
@@ -2365,6 +2395,17 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue,
                         datetime.utcfromtimestamp(
                             f['last_modified_timestamp_ms'] / 1000.0),
                 }
+
+                for e in gym_event:
+                    if e['event'] == 2:
+                        gym_events[e['pokemon_id']] = {
+                            'pokemon_uid': e['pokemon_id'],
+                            'gym_id': f['id'],
+                            'event': e['event'],
+                            'trainer_name': e['trainer'],
+                            'timestamp': datetime.utcfromtimestamp(
+                                e['timestamp_ms'] / 1000.0)
+                        }
 
                 if config['parse_raids'] and f.get('type') is None:
                     if raid_info:
@@ -2465,6 +2506,8 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue,
         db_update_queue.put((Pokestop, pokestops))
     if gyms:
         db_update_queue.put((Gym, gyms))
+    if gym_events:
+        db_update_queue.put((GymEvent, gym_events))
     if raids:
         db_update_queue.put((Raid, raids))
     if spawn_points:
@@ -2786,7 +2829,7 @@ def create_tables(db):
     tables = [Pokemon, Pokestop, Gym, Raid, ScannedLocation, GymDetails,
               GymMember, GymPokemon, Trainer, MainWorker, WorkerStatus,
               SpawnPoint, ScanSpawnPoint, SpawnpointDetectionData,
-              Token, LocationAltitude, PlayerLocale, HashKeys]
+              Token, LocationAltitude, PlayerLocale, HashKeys, GymEvent]
     for table in tables:
         if not table.table_exists():
             log.info('Creating table: %s', table.__name__)
@@ -2801,7 +2844,7 @@ def drop_tables(db):
               GymDetails, GymMember, GymPokemon, Trainer, MainWorker,
               WorkerStatus, SpawnPoint, ScanSpawnPoint,
               SpawnpointDetectionData, LocationAltitude, PlayerLocale,
-              Token, HashKeys]
+              Token, HashKeys, GymEvent]
     db.connect()
     db.execute_sql('SET FOREIGN_KEY_CHECKS=0;')
     for table in tables:
